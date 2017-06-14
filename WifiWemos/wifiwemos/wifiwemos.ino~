@@ -8,16 +8,23 @@
 const char* ssid = "Escritorio";
 const char* password = "80818283";
  
-int ledPin = D5;
+int outAct = D5;
+int warningLed = D4;
+int warningState = 0;
 WiFiServer server(81);
+String mens = "";
  
 void setup() {
+	
+  mens.reserve(200);
   Serial.begin(115200);
-  delay(10);
+  delay(10); 
  
- 
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+  pinMode(outAct, OUTPUT);
+  pinMode(warningLed, OUTPUT);  
+  
+  digitalWrite(outAct, LOW);
+  digitalWrite(warningLed, LOW);
  
   // Connect to WiFi network
   Serial.println();
@@ -28,8 +35,7 @@ void setup() {
   WiFi.begin(ssid, password);
  
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+     warningChange(500);
   }
   Serial.println("");
   Serial.println("WiFi connected");
@@ -43,6 +49,7 @@ void setup() {
   Serial.print("http://");
   Serial.print(WiFi.localIP());
   Serial.println("/");
+   digitalWrite(warningLed, HIGH);
  
 }
  
@@ -68,11 +75,11 @@ void loop() {
  
   int value = LOW;
   if (request.indexOf("/LED=ON") != -1) {
-    digitalWrite(ledPin, HIGH);
+    digitalWrite(outAct, HIGH);
     value = HIGH;
   } 
   if (request.indexOf("/LED=OFF") != -1){
-    digitalWrite(ledPin, LOW);
+    digitalWrite(outAct, LOW);
     value = LOW;
   }
  
@@ -102,3 +109,33 @@ void loop() {
   Serial.println("");
  
 }
+
+
+void AcionarPortao(){
+   digitalWrite(outAct, HIGH);
+   delay(1000);
+   digitalWrite(outAct, LOW);
+}
+
+void warning(int pulses)
+{  
+  for (int i=0;i<pulses;i++)
+  {
+   digitalWrite(warningLed, HIGH);
+   delay(50);
+   digitalWrite(warningLed, LOW);
+   delay(50);
+  }  
+}
+
+void warningChange(int tempo){
+	delay(tempo);
+ if(warningState) {	 	
+ 	   digitalWrite(warningLed, LOW);
+ 	   warningState = 0;
+ 	}
+ 	else {
+ 			digitalWrite(warningLed, HIGH);
+ 			warningState = 1;
+ 	}
+ }
